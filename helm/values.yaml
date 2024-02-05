@@ -1,0 +1,37 @@
+server:
+  # Needed for the logrotate to be able to send SIGHUP to the server
+  shareProcessNamespace: true
+  auditStorage:
+    enabled: true
+    size: '1Gi'
+  extraContainers:
+    - name: logrotate
+      image: joonvena/logrotate:0.1
+      imagePullPolicy: Always
+      volumeMounts:
+        - name: audit
+          mountPath: /vault/audit
+        - name: logrotate-config
+          mountPath: /app/logrotate.conf
+          subPath: logrotate.conf
+          readOnly: true
+      env:
+        - name: LOGROTATE_STATUS_FILE_PATH
+          value: "/vault/audit/logrotate.status"
+    - name: fluentd
+      image: joonvena/fluentd-azure-blob:0.1
+      volumeMounts:
+        - name: audit
+          mountPath: /vault/audit
+        - name: fluentd-config
+          mountPath: /fluentd/etc/fluent.conf
+          subPath: fluent.conf
+          readOnly: true
+  volumes:
+    - name: fluentd-config
+      configMap:
+        name: fluentd-config
+    - name: logrotate-config
+      configMap:
+        name: logrotate-config
+  
