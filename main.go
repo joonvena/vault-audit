@@ -22,7 +22,12 @@ func main() {
 		cronSchedule = "@daily"
 	}
 
-	args := []string{"-s", "logrotate.status", "logrotate.conf"}
+	logrotateStatusFilePath := os.Getenv("LOGROTATE_STATUS_FILE_PATH")
+	if logrotateStatusFilePath == "" {
+		logrotateStatusFilePath = "logrotate.status"
+	}
+
+	args := []string{"-s", logrotateStatusFilePath, "logrotate.conf"}
 
 	if _, ok := os.LookupEnv("DEBUG"); ok {
 		args = append(args, "-d")
